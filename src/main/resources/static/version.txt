@@ -1,1 +1,1 @@
-b2d1719cc30aacaeb171183608984aed21eb7630 now using excel formula to calculate things.
+df6462ac8c141d4574f4b8d2424bf1e1f92c9959 mvn install now runs a shell script to put most recent commit info in a text file.
