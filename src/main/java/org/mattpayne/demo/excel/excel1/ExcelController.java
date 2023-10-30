@@ -10,6 +10,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
 import java.io.FileOutputStream;
+import java.util.Random;
 
 @Controller
 public class ExcelController {
@@ -28,9 +29,20 @@ public class ExcelController {
 
             // Create "data" sheet
             Sheet dataSheet = workbook.createSheet("data");
-            Row dataRow = dataSheet.createRow(0);
-            Cell dataCell = dataRow.createCell(0);
-            dataCell.setCellValue("This is the data sheet.");
+            // Generate 10 columns with random floating-point numbers and labels "A" through "M"
+            Random random = new Random();
+            for (int rowIndex = 0; rowIndex < 10; rowIndex++) {
+                Row dataRow = dataSheet.createRow(rowIndex);
+                for (int colIndex = 0; colIndex < 13; colIndex++) {
+                    Cell dataCell = dataRow.createCell(colIndex);
+                    if (colIndex == 0) {
+                        dataCell.setCellValue("A" + (rowIndex + 1));
+                    } else {
+                        double randomValue = -5 + (100 + 5) * random.nextDouble();
+                        dataCell.setCellValue(randomValue);
+                    }
+                }
+            }
 
             // Create a temporary file to save the workbook
             java.io.File tempFile = java.io.File.createTempFile("sample", ".xlsx");
