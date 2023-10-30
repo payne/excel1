@@ -1,0 +1,1 @@
+b2d1719cc30aacaeb171183608984aed21eb7630 now using excel formula to calculate things.
