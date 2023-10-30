@@ -1,7 +1,6 @@
 package org.mattpayne.demo.excel.excel1;
 
 
-import org.apache.commons.math3.stat.descriptive.rank.Median;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.http.HttpHeaders;
@@ -11,8 +10,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
 import java.io.FileOutputStream;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
 
 @Controller
@@ -29,12 +26,11 @@ public class ExcelController {
             // Create "data" sheet
             Sheet dataSheet = workbook.createSheet("data");
 
-            // Generate random data and calculate statistics
+            // Generate random data
             Random random = new Random();
             CellStyle decimalStyle = workbook.createCellStyle();
             DataFormat df = workbook.createDataFormat();
             decimalStyle.setDataFormat(df.getFormat("0.00"));
-            List<List<Double>> data = new ArrayList<>();
 
             // Create headers for the "summary" sheet
             Row summaryHeader = summarySheet.createRow(0);
@@ -44,9 +40,9 @@ public class ExcelController {
             summaryHeader.createCell(3).setCellValue("Max");
             summaryHeader.createCell(4).setCellValue("Min");
             summaryHeader.createCell(5).setCellValue("Sum");
+
             for (int rowIndex = 0; rowIndex < 10; rowIndex++) {
                 Row dataRow = dataSheet.createRow(rowIndex);
-                List<Double> rowData = new ArrayList<>();
                 for (int colIndex = 0; colIndex < 13; colIndex++) {
                     Cell dataCell = dataRow.createCell(colIndex);
                     if (colIndex == 0) {
@@ -55,39 +51,19 @@ public class ExcelController {
                         double randomValue = -5 + (100 + 5) * random.nextDouble();
                         dataCell.setCellValue(randomValue);
                         dataCell.setCellStyle(decimalStyle);
-                        rowData.add(randomValue);
                     }
                 }
-                data.add(rowData);
             }
 
-            // Write summary statistics to the "summary" sheet
+            // Write Excel formulas to calculate statistics in the "summary" sheet
             for (int rowIndex = 0; rowIndex < 10; rowIndex++) {
-                Row summaryRow = summarySheet.createRow(rowIndex);
-                Cell meanCell = summaryRow.createCell(0);
-                Cell medianCell = summaryRow.createCell(1);
-                Cell maxCell = summaryRow.createCell(2);
-                Cell minCell = summaryRow.createCell(3);
-                Cell sumCell = summaryRow.createCell(4);
-
-                List<Double> rowData = data.get(rowIndex);
-                double mean = calculateMean(rowData);
-                double median = calculateMedian(rowData);
-                double max = calculateMax(rowData);
-                double min = calculateMin(rowData);
-                double sum = calculateSum(rowData);
-
-                meanCell.setCellValue(mean);
-                medianCell.setCellValue(median);
-                maxCell.setCellValue(max);
-                minCell.setCellValue(min);
-                sumCell.setCellValue(sum);
-
-                meanCell.setCellStyle(decimalStyle);
-                medianCell.setCellStyle(decimalStyle);
-                maxCell.setCellStyle(decimalStyle);
-                minCell.setCellStyle(decimalStyle);
-                sumCell.setCellStyle(decimalStyle);
+                Row summaryRow = summarySheet.createRow(rowIndex + 1); // Add 1 for the header row
+                summaryRow.createCell(0).setCellValue("Row " + (rowIndex + 1));
+                summaryRow.createCell(1).setCellFormula("AVERAGE(data!B" + (rowIndex + 1) + ":N" + (rowIndex + 1) + ")");
+                summaryRow.createCell(2).setCellFormula("MEDIAN(data!B" + (rowIndex + 1) + ":N" + (rowIndex + 1) + ")");
+                summaryRow.createCell(3).setCellFormula("MAX(data!B" + (rowIndex + 1) + ":N" + (rowIndex + 1) + ")");
+                summaryRow.createCell(4).setCellFormula("MIN(data!B" + (rowIndex + 1) + ":N" + (rowIndex + 1) + ")");
+                summaryRow.createCell(5).setCellFormula("SUM(data!B" + (rowIndex + 1) + ":N" + (rowIndex + 1) + ")");
             }
 
             // Create a temporary file to save the workbook
@@ -109,38 +85,4 @@ public class ExcelController {
             return new ResponseEntity<>(org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-
-    private double calculateMean(List<Double> data) {
-        double sum = 0;
-        for (Double value : data) {
-            sum += value;
-        }
-        return sum / data.size();
-    }
-
-    private double calculateMedian(List<Double> data) {
-        double[] values = new double[data.size()];
-        for (int i = 0; i < data.size(); i++) {
-            values[i] = data.get(i);
-        }
-        Median medianFunction = new Median();
-        return medianFunction.evaluate(values);
-    }
-
-    private double calculateMax(List<Double> data) {
-        return data.stream().max(Double::compare).orElse(0.0);
-    }
-
-    private double calculateMin(List<Double> data) {
-        return data.stream().min(Double::compare).orElse(0.0);
-    }
-
-    private double calculateSum(List<Double> data) {
-        double sum = 0;
-        for (Double value : data) {
-            sum += value;
-        }
-        return sum;
-    }
 }
-
