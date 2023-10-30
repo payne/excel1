@@ -1,5 +1,6 @@
 package org.mattpayne.demo.excel.excel1;
 
+
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.http.HttpHeaders;
@@ -15,18 +16,22 @@ public class ExcelController {
 
     @GetMapping("/download-excel")
     public ResponseEntity<byte[]> downloadExcel() {
-        // Create a new workbook
-        Workbook workbook = new XSSFWorkbook();
-
-        // Create a new sheet
-        Sheet sheet = workbook.createSheet("Sample Sheet");
-
-        // Create a sample row and cell with data
-        Row row = sheet.createRow(0);
-        Cell cell = row.createCell(0);
-        cell.setCellValue("Hello, World!");
-
         try {
+            // Create a new workbook
+            Workbook workbook = new XSSFWorkbook();
+
+            // Create "summary" sheet
+            Sheet summarySheet = workbook.createSheet("summary");
+            Row summaryRow = summarySheet.createRow(0);
+            Cell summaryCell = summaryRow.createCell(0);
+            summaryCell.setCellValue("This is the summary sheet.");
+
+            // Create "data" sheet
+            Sheet dataSheet = workbook.createSheet("data");
+            Row dataRow = dataSheet.createRow(0);
+            Cell dataCell = dataRow.createCell(0);
+            dataCell.setCellValue("This is the data sheet.");
+
             // Create a temporary file to save the workbook
             java.io.File tempFile = java.io.File.createTempFile("sample", ".xlsx");
             try (FileOutputStream outputStream = new FileOutputStream(tempFile)) {
